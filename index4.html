@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Каталог товарів — VIP Продукти</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --surface-2: #f9f9fb;
+    --border: #e8e8ed;
+    --text-primary: #1d1d1f;
+    --text-secondary: #6e6e73;
+    --text-tertiary: #aeaeb2;
+    --accent: #0071e3;
+    --accent-light: #e8f1fb;
+    --green: #28a745;
+    --red: #dc3545;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-md: 0 8px 32px rgba(0,0,0,0.08);
+    --shadow-lg: 0 20px 60px rgba(0,0,0,0.10);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  body {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* HEADER */
+  header {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 0 24px;
+  }
+
+  .header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    height: 64px;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    letter-spacing: -0.3px;
+  }
+  .logo span { color: var(--accent); }
+
+  .search-wrap {
+    flex: 1;
+    max-width: 480px;
+    position: relative;
+  }
+  .search-wrap svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+    pointer-events: none;
+  }
+  #search {
+    width: 100%;
+    padding: 10px 16px 10px 42px;
+    border: 1.5px solid var(--border);
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: 15px;
+    background: var(--surface-2);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  }
+  #search:focus {
+    border-color: var(--accent);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(0,113,227,0.12);
+  }
+  #search::placeholder { color: var(--text-tertiary); }
+
+  .header-stats {
+    margin-left: auto;
+    font-size: 13px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  /* AVAILABILITY TOGGLE */
+  .avail-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .toggle-switch {
+    width: 38px;
+    height: 22px;
+    background: var(--border);
+    border-radius: 11px;
+    position: relative;
+    transition: background 0.25s;
+  }
+  .toggle-switch.active { background: var(--accent); }
+  .toggle-switch::after {
+    content: '';
+    width: 16px; height: 16px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px; left: 3px;
+    transition: transform 0.25s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .toggle-switch.active::after { transform: translateX(16px); }
+
+  /* CATEGORIES */
+  .cats-outer {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .cats-outer::-webkit-scrollbar { display: none; }
+  .cats-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    gap: 4px;
+    padding: 10px 24px;
+    align-items: center;
+  }
+  .cat-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border: none;
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.18s;
+    background: transparent;
+    color: var(--text-secondary);
+  }
+  .cat-btn:hover { background: var(--accent-light); color: var(--accent); }
+  .cat-btn.active { background: var(--accent); color: white; }
+  .cat-btn .count {
+    background: rgba(255,255,255,0.3);
+    border-radius: 50px;
+    padding: 1px 7px;
+    font-size: 11px;
+  }
+  .cat-btn.active .count { background: rgba(255,255,255,0.25); }
+  .cat-btn:not(.active) .count { background: var(--border); color: var(--text-tertiary); }
+
+  /* MAIN */
+  main { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 16px;
+    margin-top: 8px;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .section-count {
+    font-size: 14px;
+    color: var(--text-tertiary);
+    font-weight: 600;
+  }
+
+  /* GRID */
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.3s ease both;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+  .card.unavailable { opacity: 0.5; }
+  .card.unavailable .price-tag { color: var(--red); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-brand {
+    font-size: 10.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--accent);
+  }
+  .card-name {
+    font-size: 14.5px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--text-primary);
+    flex: 1;
+  }
+  .card-details {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    line-height: 1.5;
+  }
+  .card-footer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    margin-top: auto;
+  }
+  .price-tag {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+  .price-tag .currency {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-left: 2px;
+  }
+  .price-unavail {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--red);
+  }
+  .units-badge {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 3px 10px;
+  }
+  .origin-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    display: inline-block;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  /* EMPTY STATE */
+  .empty {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text-secondary);
+  }
+  .empty-icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .empty-sub { font-size: 15px; }
+
+  /* NO RESULTS */
+  .no-results {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text-secondary);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .header-inner { gap: 12px; height: 56px; }
+    .logo { font-size: 18px; }
+    .header-stats { display: none; }
+    main { padding: 16px; }
+    .products-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .card { padding: 14px; }
+    .price-tag { font-size: 18px; }
+    .avail-toggle span { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">VIP<span>.</span> Каталог</div>
+    <div class="search-wrap">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search" placeholder="Пошук товарів..." autocomplete="off">
+    </div>
+    <label class="avail-toggle" id="availToggle">
+      <div class="toggle-switch active" id="toggleSwitch"></div>
+      <span>Тільки в наявності</span>
+    </label>
+    <div class="header-stats" id="statsEl"></div>
+  </div>
+</header>
+
+<div class="cats-outer">
+  <div class="cats-inner" id="catsContainer"></div>
+</div>
+
+<main id="main"></main>
+
+<script>
+const ALL_PRODUCTS = [
+  // ТМ RIO — Консерви та соуси
+  {cat:"ТМ RIO", name:"Початки кукурудзи RIO", details:"220г, скло, 12 шт", price:53.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Коктейльна вишня RIO", details:"240мл, скло, 24 шт", price:63.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Огірки корнішони RIO", details:"550г, скло, 8 шт", price:65.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Огірки марин. пікулі RIO", details:"314мл (1-2см), скло, 12 шт", price:50.50, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Огірки марин. пікулі RIO", details:"720мл (1-2см), скло, 12 шт", price:101.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Огірки цілі консервовані RIO", details:"3л, скло, 4 шт", price:135.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Асорті огірки/помідори RIO", details:"1л, скло, 8 шт", price:0, brand:"RIO", available:false},
+  {cat:"ТМ RIO", name:"Асорті огірки/помідори/патисони RIO", details:"1л, скло, 8 шт", price:79.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Печериці мариновані RIO", details:"280г, 314мл, скло, 12 шт", price:57.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Печериці мариновані RIO", details:"420г, 580мл, скло, 8 шт", price:73.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Печериці мариновані RIO", details:"690г, 720мл, скло, 8 шт", price:107.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Печериці різані RIO", details:"280г, скло, 8 шт", price:47.50, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Печериці різані RIO", details:"3100мл, 1850г, з/б, 6 шт", price:290.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Опеньки консервовані РИО", details:"255г, 314мл, скло, 12 шт", price:56.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Опеньки консервовані РИО", details:"1600г/1330г чиста вага, скло, 6 шт", price:270.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Грибна підлива Жюльєн РИО", details:"410г, скло, 6 шт", price:80.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Шпажки RIO", details:"240г, скло, 12 шт", price:67.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Ананаси шматочками RIO", details:"580мл, з/б, 24 шт", price:56.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Ананаси кільцями RIO", details:"580мл, з/б, 24 шт", price:71.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Ананаси шматочками RIO", details:"3100мл, з/б, 6 шт", price:311.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Томати мариновані RIO", details:"1л, скло, 8 шт", price:51.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Томати чері RIO", details:"720мл, скло, 8 шт", price:51.50, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Томати не очищені у власн. соку RIO", details:"1л, скло, 8 шт", price:0, brand:"RIO", available:false},
+  {cat:"ТМ RIO", name:"Томати мариновані RIO", details:"3л, скло, 4 шт", price:131.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Персики RIO половинками", details:"850г, з/б, 12 шт", price:78.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Маслини RIO Іспанія чорні б/к", details:"314мл, з/б, 12 шт", price:38.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Оливки RIO Іспанія зелені б/к", details:"314мл, з/б, 12 шт", price:42.50, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Кукурудза РІО делікатесна", details:"420г, з/б, 12 шт", price:27.50, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Горошок РІО консервований", details:"420г, з/б, 12 шт", price:27.50, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Свинина тушкована РІО", details:"440г, скло, 8 шт", price:0, brand:"RIO", available:false},
+  {cat:"ТМ RIO", name:"Свинина тушкована РІО", details:"370г, з/б, 12 шт", price:66.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Перець RIO гострий маринований", details:"390г, скло, 8 шт", price:52.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Перець РІО гострий Джалапено", details:"280г, скло, 12 шт", price:65.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Перець RIO чері", details:"220г, скло, 12 шт", price:70.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Квасоля RIO по-грузинськи в т/с", details:"480г, скло, 8 шт", price:31.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Квасоля RIO пікантна в т/с", details:"480г, скло, 8 шт", price:29.50, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Квасоля RIO з овочами т/с", details:"480г, скло, 8 шт", price:31.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Квасоля RIO делікатесна біла", details:"480г, скло, 8 шт", price:28.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Олія соняшника рафін. Томат/часник/базилік", details:"250мл, скло, 12 шт", price:44.50, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Олія соняшника рафін. Гостр.перець/базилік/томат", details:"250мл, скло, 12 шт", price:44.50, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Олія соняшника рафін. Часник/базилік", details:"250мл, скло, 12 шт", price:44.50, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Оцет яблучний RIO", details:"500г, скло, 12 шт", price:21.60, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Оливкова олія RIO Іспанія", details:"250мл, скло, 12 шт", price:106.00, brand:"RIO", available:true},
+  {cat:"ТМ RIO", name:"Оливкова олія RIO Іспанія", details:"500мл, скло, 12 шт", price:193.00, brand:"RIO", available:true},
+
+  // Соєві соуси
+  {cat:"Соуси та оцти", name:"Соєвий соус RIO", details:"1л, пет, 12 шт", price:35.00, brand:"RIO", available:true},
+  {cat:"Соуси та оцти", name:"Соєвий соус класичний", details:"250г, скло, 12 шт", price:33.60, brand:"", available:true},
+  {cat:"Соуси та оцти", name:"Соєвий соус Сенсой", details:"1л, пет, 12 шт", price:39.00, brand:"Сенсой", available:true},
+  {cat:"Соуси та оцти", name:"Соєвий соус Чонг", details:"500мл, пет, 12 шт", price:21.00, brand:"Чонг", available:true},
+  {cat:"Соуси та оцти", name:"Соєвий соус Чонг", details:"1л, пет, 12 шт", price:35.00, brand:"Чонг", available:true},
+  {cat:"Соуси та оцти", name:"Соус гранатовий Наршараб", details:"240мл, скло, 30 шт", price:34.00, brand:"Narsarab", available:true},
+  {cat:"Соуси та оцти", name:"Майонез Хелманс", details:"340г, скло, 12 шт", price:103.00, brand:"Hellmann's", available:true},
+  {cat:"Соуси та оцти", name:"Майонез Хелманс", details:"405г, скло, 12 шт", price:0, brand:"Hellmann's", available:false},
+  {cat:"Соуси та оцти", name:"Соус соєвий Kania", details:"500г, 15 шт/ящ", price:112.20, brand:"Kania", available:true},
+  {cat:"Соуси та оцти", name:"Оцет яблучний ГАРСІЄ", details:"250г, скло, 12 шт", price:0, brand:"Гарсіє", available:false},
+  {cat:"Соуси та оцти", name:"Оцет яблучний Італія", details:"500г, скло, 12 шт", price:88.23, brand:"IT", available:true},
+  {cat:"Соуси та оцти", name:"Оцет винний Італія білий", details:"скло, 12 шт", price:94.35, brand:"IT", available:true},
+  {cat:"Соуси та оцти", name:"Оцет винний Італія червоний", details:"скло, 12 шт", price:94.35, brand:"IT", available:true},
+  {cat:"Соуси та оцти", name:"Оцет бальзамічний Casa Verdi Італія", details:"500г, скло, 12 шт", price:105.57, brand:"Casa Verdi", available:true},
+  {cat:"Соуси та оцти", name:"Оцет бальзамічний СПРЕЙ Італія", details:"250г, скло, 6 шт", price:87.00, brand:"IT", available:true},
+  {cat:"Соуси та оцти", name:"Бальзамічний крем-соус Італія полуниця", details:"500г, 12 шт", price:151.47, brand:"IT", available:true},
+  {cat:"Соуси та оцти", name:"Песто Деліція зелене", details:"180г, 12 шт", price:73.44, brand:"Деліція", available:true},
+  {cat:"Соуси та оцти", name:"Песто Барила Дженовезе зелене", details:"190г, 12 шт", price:113.22, brand:"Barilla", available:true},
+  {cat:"Соуси та оцти", name:"Песто Troppo i Buoni Genovese", details:"190г, 12 шт", price:69.87, brand:"Troppo i Buoni", available:true},
+
+  // TERRA RICCA
+  {cat:"TERRA RICCA", name:"Крем-соус бальзамічний з виноградом", details:"250г, пет, 8 шт/ящ", price:46.00, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Крем-соус бальзамічний з чорн. смородиною", details:"250г, пет, 8 шт/ящ", price:46.00, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Крем-соус бальзамічний з гранатом", details:"250г, пет, 8 шт/ящ", price:46.00, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Крем-соус солодкий гранат", details:"250г, пет, 8 шт/ящ", price:46.00, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Крем-соус з журавлиною", details:"250г, 8 шт/ящ", price:46.00, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Крем-соус з лимоном", details:"250г, пет, 8 шт/ящ", price:46.00, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Крем-соус з лимоном та медом", details:"250г, пет, 8 шт/ящ", price:46.00, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Крем-соус з гірчицею та медом", details:"250г, пет, 8 шт/ящ", price:46.00, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Крем-соус сливовий з часником", details:"250г, пет, 8 шт/ящ", price:46.00, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Крем-соус вишневий", details:"250г, пет, 8 шт/ящ", price:46.00, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Бальзамічний оцет гранат", details:"200мл, ПЕТ, 8 шт/ящ", price:29.00, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Бальзамічний оцет виноград", details:"200мл, ПЕТ, 8 шт/ящ", price:29.00, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Бальзамічний оцет смородина", details:"200мл, ПЕТ, 8 шт/ящ", price:29.00, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Маринад-соус гірчично-медовий", details:"100г, 15 шт/ящ", price:18.40, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Маринад-соус гранат", details:"100г, 15 шт/ящ", price:18.40, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Маринад-соус соєвий з часником", details:"100г, 15 шт/ящ", price:11.00, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Маринад-соус солодкий чилі", details:"100г, 15 шт/ящ", price:16.50, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Маринад-соус солодкий чилі часник", details:"100г, 15 шт/ящ", price:16.50, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Олія гарбузова", details:"200мл, скло, 6 шт/ящ", price:112.00, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Олія з кунжуту", details:"200мл, скло, 6 шт/ящ", price:136.00, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Олія з льону", details:"200мл, скло, 6 шт/ящ", price:68.50, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Олія волоський горіх", details:"200мл, скло, 6 шт/ящ", price:81.00, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Олія чорного кмину", details:"200мл, скло, 6 шт/ящ", price:270.00, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Олія розторопші", details:"200мл, скло, 6 шт/ящ", price:160.00, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Суміш корисних олій №1", details:"200мл, скло, 6 шт/ящ (соняшник, гарбуз, кукурудза, льон, горіх)", price:69.00, brand:"TERRA RICCA", available:true},
+  {cat:"TERRA RICCA", name:"Суміш корисних олій №7 соняшник-гарбуз-льон", details:"200мл, скло, 6 шт/ящ", price:69.00, brand:"TERRA RICCA", available:true},
+
+  // Олія
+  {cat:"Олії", name:"Оливкова олія Маестро Гарсіє (суміш)", details:"250мл, скло, 12 шт", price:57.00, brand:"Гарсіє", available:true},
+  {cat:"Олії", name:"Оливкова олія Маестро Гарсіє (суміш)", details:"500мл, 12 шт", price:87.00, brand:"Гарсіє", available:true},
+  {cat:"Олії", name:"Оливкова олія Маестро Гарсіє (суміш)", details:"1000мл, 6 шт", price:129.00, brand:"Гарсіє", available:true},
+  {cat:"Олії", name:"Кукурудзяна олія (Olio di semi di mais) Італія", details:"1л, з/б, 6 шт", price:114.00, brand:"IT", available:true},
+  {cat:"Олії", name:"Оливкова олія TASOS", details:"5л, з/б, 4 шт", price:485.00, brand:"TASOS", available:true},
+  {cat:"Олії", name:"Оливкова олія RMIX", details:"1л, з/б, 6 шт", price:126.00, brand:"RMIX", available:true},
+  {cat:"Олії", name:"Оливкова олія GOCCIA D'ORO", details:"1л, з/б, 6 шт", price:126.00, brand:"GOCCIA D'ORO", available:true},
+  {cat:"Олії", name:"Оливки скло Bella Contadino Італія", details:"250г/500мл, скло, 9 шт", price:66.00, brand:"Bella Contadino", available:true},
+  {cat:"Олії", name:"Кокосове масло", details:"500мл, 8 шт", price:85.00, brand:"", available:true},
+  {cat:"Олії", name:"Олія авокадо Monterico Іспанія", details:"250г, скло, 12 шт", price:212.67, brand:"Monterico", available:true},
+  {cat:"Олії", name:"Оливкова олія Monterico Extra Virgin", details:"1л", price:409.53, brand:"Monterico", available:true},
+  {cat:"Олії", name:"Оливкова олія Monterico Extra нефільтрована", details:"1л, 6 шт", price:430.44, brand:"Monterico", available:true},
+  {cat:"Олії", name:"Оливкова олія De Cecco Classico", details:"1л, 12 шт/ящ", price:410.55, brand:"De Cecco", available:true},
+  {cat:"Олії", name:"Оливкова олія Monini Classico Extra Vergine", details:"1л, 12 шт", price:410.55, brand:"Monini", available:true},
+  {cat:"Олії", name:"Олія виноградних кісточок Farchioni", details:"1л, скло, 12 шт", price:339.15, brand:"Farchioni", available:true},
+  {cat:"Олії", name:"Оливкова олія Farchioni Extra Vergine Італія", details:"1л, 12 шт", price:375.36, brand:"Farchioni", available:true},
+  {cat:"Олії", name:"Оливкова олія Monini Anfora", details:"1л, 12 шт", price:377.40, brand:"Monini", available:true},
+  {cat:"Олії", name:"Оливкова олія Luglio Extra Virgin", details:"1л, 12 шт", price:0, brand:"Luglio", available:false},
+
+  // Галицькі традиції
+  {cat:"Галицькі Традиції", name:"Паштет свинний Галицькі Традиції", details:"370г, 10 шт", price:35.00, brand:"Галицькі Традиції", available:true},
+  {cat:"Галицькі Традиції", name:"Паштет курячий Галицькі Традиції", details:"370г, 10 шт", price:35.00, brand:"Галицькі Традиції", available:true},
+  {cat:"Галицькі Традиції", name:"Паштет яловичий Галицькі Традиції", details:"370г, 10 шт", price:35.00, brand:"Галицькі Традиції", available:true},
+  {cat:"Галицькі Традиції", name:"Паштет курячий Польща 100%", details:"390г, 10 шт", price:0, brand:"Польща", available:false},
+  {cat:"Галицькі Традиції", name:"Паштет свинний Польща 100%", details:"390г, 10 шт", price:0, brand:"Польща", available:false},
+  {cat:"Галицькі Традиції", name:"Паштет індюка Польща 100%", details:"390г, 10 шт", price:0, brand:"Польща", available:false},
+  {cat:"Галицькі Традиції", name:"Локшина довга фігурна №1", details:"250г, 20 шт", price:27.00, brand:"Галицькі Традиції", available:true},
+  {cat:"Галицькі Традиції", name:"Локшина домашня довга №2", details:"250г, 20 шт", price:27.00, brand:"Галицькі Традиції", available:true},
+  {cat:"Галицькі Традиції", name:"Вермішель домашня довга №3", details:"400г, 20 шт", price:32.00, brand:"Галицькі Традиції", available:true},
+  {cat:"Галицькі Традиції", name:"Локшина mix з томатом і паприкою №4", details:"300г, 20 шт", price:32.00, brand:"Галицькі Традиції", available:true},
+  {cat:"Галицькі Традиції", name:"Локшина «Боніта» домашня яєчна №5", details:"400г, 20 шт", price:33.00, brand:"Галицькі Традиції", available:true},
+  {cat:"Галицькі Традиції", name:"Ріжки домашні яєчні", details:"400г, пакет, 20 шт", price:30.00, brand:"Галицькі Традиції", available:true},
+  {cat:"Галицькі Традиції", name:"Локшина домашня яєчна", details:"400г, пакет, 20 шт", price:30.00, brand:"Галицькі Традиції", available:true},
+  {cat:"Галицькі Традиції", name:"Локшина «БОНІТА» домашня яєчна", details:"400г, пакет, 20 шт", price:30.00, brand:"Галицькі Традиції", available:true},
+  {cat:"Галицькі Традиції", name:"Вермішель домашня яєчна", details:"400г, пакет, 20 шт", price:30.00, brand:"Галицькі Традиції", available:true},
+  {cat:"Галицькі Традиції", name:"Пружинки домашні яєчні", details:"400г, пакет, 20 шт", price:30.00, brand:"Галицькі Традиції", available:true},
+  {cat:"Галицькі Традиції", name:"Трубочки домашні яєчні", details:"400г, пакет, 20 шт", price:30.00, brand:"Галицькі Традиції", available:true},
+  {cat:"Галицькі Традиції", name:"Кільця домашні яєчні", details:"400г, пакет, 20 шт", price:30.00, brand:"Галицькі Традиції", available:true},
+  {cat:"Галицькі Традиції", name:"Приправа універсальна", details:"1кг, банка, 6 шт", price:77.00, brand:"Галицькі Традиції", available:true},
+  {cat:"Галицькі Традиції", name:"Сушені овочі", details:"300г, банка, 6 шт", price:101.00, brand:"Галицькі Традиції", available:true},
+  {cat:"Галицькі Традиції", name:"Сушені овочі БОРЩ", details:"300г, банка, 6 шт", price:103.00, brand:"Галицькі Традиції", available:true},
+
+  // Бакалія
+  {cat:"Бакалія", name:"Макарони Delverde Lasagne Італія", details:"500г, 12 шт", price:82.11, brand:"Delverde", available:true},
+  {cat:"Бакалія", name:"Макарони Delverde #82 Tagliatelle Гнізда Італія", details:"250г, 12 шт", price:54.57, brand:"Delverde", available:true},
+  {cat:"Бакалія", name:"Макарони Delverde #82 Apelli D'Angelo Гнізда", details:"250г, 12 шт", price:54.57, brand:"Delverde", available:true},
+  {cat:"Бакалія", name:"Макарони Delverde #134 Tagliatelle зі шпинатом", details:"250г, 12 шт", price:62.73, brand:"Delverde", available:true},
+  {cat:"Бакалія", name:"Макарони Combino перо Польща", details:"500г, 18 шт", price:29.00, brand:"Combino", available:true},
+  {cat:"Бакалія", name:"Макарони Combino ріжки Польща", details:"500г, 18 шт", price:29.00, brand:"Combino", available:true},
+  {cat:"Бакалія", name:"Макарони Combino спиральки Польща", details:"500г, 18 шт", price:29.00, brand:"Combino", available:true},
+  {cat:"Бакалія", name:"Рисова локшина плоска GO ONG", details:"200г", price:0, brand:"GO ONG", available:true},
+  {cat:"Бакалія", name:"Курячий бульйон RMIX Польща", details:"1×6 шт/бл, 26 бл/уп", price:10.80, brand:"RMIX", available:true},
+  {cat:"Бакалія", name:"Курячий бульйон Кухарек Польща", details:"1×6 шт, 24 бл/ящ", price:12.60, brand:"Кухарек", available:true},
+  {cat:"Бакалія", name:"Грибний бульйон Кухарек Польща", details:"1×6 шт, 24 бл/ящ", price:12.60, brand:"Кухарек", available:true},
+  {cat:"Бакалія", name:"Паста томатна Mutti Італія", details:"80г, 21 шт", price:17.00, brand:"Mutti", available:true},
+  {cat:"Бакалія", name:"Квасоля червона Польща", details:"400г, з/б, 12 шт", price:32.00, brand:"Польща", available:true},
+  {cat:"Бакалія", name:"Вівсяні пластівці Nordwaldtaler Zarte Haferflocken", details:"500г, 9 шт", price:27.70, brand:"Nordwaldtaler", available:true},
+  {cat:"Бакалія", name:"Цукрова пудра", details:"200г, 20 шт", price:12.50, brand:"", available:true},
+  {cat:"Бакалія", name:"Ванільний цукор", details:"18г", price:2.30, brand:"", available:true},
+  {cat:"Бакалія", name:"Крохмал картопляний", details:"200г, 20 шт", price:22.50, brand:"", available:true},
+  {cat:"Бакалія", name:"Кокосова стружка", details:"100г, 30 шт", price:27.00, brand:"", available:true},
+  {cat:"Бакалія", name:"Кокосове молоко M&K", details:"400г, 18 шт", price:69.00, brand:"M&K", available:true},
+  {cat:"Бакалія", name:"Крем сир Sovia натуральний", details:"300г, 24 шт/ящ", price:102.51, brand:"Sovia", available:true},
+  {cat:"Бакалія", name:"Сік лайма", details:"200г, 12 шт", price:24.48, brand:"", available:true},
+  {cat:"Бакалія", name:"Сік лимона", details:"200г, 12 шт", price:24.48, brand:"", available:true},
+  {cat:"Бакалія", name:"Сік апельсина", details:"200г, 12 шт", price:27.03, brand:"", available:true},
+  {cat:"Бакалія", name:"Цукор тростинний Azucar Moreno Іспанія", details:"1кг, 10 шт", price:144.84, brand:"Sucrebo", available:true},
+  {cat:"Бакалія", name:"Тростинний цукор Everton Італія", details:"1кг пісок, 10 шт", price:159.12, brand:"Everton", available:true},
+  {cat:"Бакалія", name:"Цукор тростинний Морена рафінад (кубики)", details:"1кг, 10 шт", price:209.10, brand:"Морена", available:true},
+  {cat:"Бакалія", name:"Цукор тростинний Zollette di Zucchero (кубики)", details:"1кг, 5 шт", price:186.15, brand:"Zollette", available:true},
+  {cat:"Бакалія", name:"Печиво Савоярді Tiramisu Piacelli", details:"400г, Австрія, 15 шт", price:103.00, brand:"Piacelli", available:true},
+  {cat:"Бакалія", name:"Гарбузове смажене насіння", details:"250г", price:54.00, brand:"", available:true},
+
+  // Каво-чайна продукція
+  {cat:"Кава Swisso", name:"Swisso Кава мелена вакуум", details:"500г, 12 шт, Німеччина", price:314.16, brand:"Swisso", available:true},
+  {cat:"Кава Swisso", name:"Swisso Стик", details:"2г, 18 шт/бл, Німеччина", price:6.12, brand:"Swisso", available:true},
+  {cat:"Кава Swisso", name:"Swisso BARISTA Кава в зернах", details:"1кг, 8 шт, Німеччина", price:684.42, brand:"Swisso", available:true},
+  {cat:"Кава Swisso", name:"Swisso Reich Rosten Кава в зернах", details:"1кг, 8 шт, Німеччина", price:633.93, brand:"Swisso", available:true},
+  {cat:"Кава Swisso", name:"Swisso Espresso Кава в зернах", details:"1кг, 8 шт", price:633.93, brand:"Swisso", available:true},
+  {cat:"Кава Swisso", name:"Swisso Crema Кава в зернах", details:"1кг, 8 шт", price:633.93, brand:"Swisso", available:true},
+  {cat:"Кава Swisso", name:"Swisso Crema в зернах Reich Rosten АРАБІКА", details:"500г, 10 шт", price:334.05, brand:"Swisso", available:true},
+  {cat:"Кава Swisso", name:"Swisso Кава розчинна субліматна м'яка упаковка", details:"200г, 16 шт", price:199.41, brand:"Swisso", available:true},
+  {cat:"Кава Swisso", name:"Swisso Кава розчинна субліматна м'яка упаковка", details:"120г, 24 шт", price:133.11, brand:"Swisso", available:true},
+  {cat:"Кава Swisso", name:"Swisso Barista розчинна субліматна скл. банка", details:"200г, 6 шт", price:277.95, brand:"Swisso", available:true},
+  {cat:"Кава Swisso", name:"Swisso Кава розчинна субліматна скл. банка", details:"200г, 6 шт", price:224.40, brand:"Swisso", available:true},
+  {cat:"Кава Swisso", name:"Swisso Кава розчинна субліматна скл. банка", details:"100г, 6 шт", price:132.09, brand:"Swisso", available:true},
+  {cat:"Кава Himmel", name:"Himmel Gold Кава мелена вакуум", details:"500г, 12 шт", price:221.85, brand:"Himmel", available:true},
+  {cat:"Кава Himmel", name:"Himmel Silver Кава мелена вакуум", details:"500г, 12 шт", price:221.85, brand:"Himmel", available:true},
+  {cat:"Кава Himmel", name:"Himmel Platin Кава мелена вакуум", details:"500г, 12 шт", price:224.40, brand:"Himmel", available:true},
+  {cat:"Кава Himmel", name:"Himmel Platin Кава мелена вакуум", details:"250г, 12 шт", price:125.97, brand:"Himmel", available:true},
+  {cat:"Кава Himmel", name:"Himmel Crema Кава в зернах", details:"1кг, 8 шт", price:539.58, brand:"Himmel", available:true},
+  {cat:"Кава Himmel", name:"Himmel Espresso Кава в зернах", details:"1кг, 8 шт", price:539.58, brand:"Himmel", available:true},
+  {cat:"Кава Himmel", name:"Himmel Classisch Кава в зернах", details:"1кг, 8 шт", price:539.58, brand:"Himmel", available:true},
+  {cat:"Кава Himmel", name:"Himmel GOLD розчинна субліматна скл. банка", details:"100г, 6 шт", price:126.48, brand:"Himmel", available:true},
+  {cat:"Кава Himmel", name:"Himmel Gold розчинна субліматна скл. банка", details:"200г, 6 шт", price:210.63, brand:"Himmel", available:true},
+  {cat:"Кава Lavazza", name:"Lavazza Qualita Oro Кава в зернах", details:"1000г, 6 шт", price:1096.50, brand:"Lavazza", available:true},
+  {cat:"Кава Lavazza", name:"Lavazza ORO Чорна пачка Кава в зернах", details:"1000г, 6 шт", price:1162.80, brand:"Lavazza", available:true},
+  {cat:"Кава Lavazza", name:"Lavazza Crema e Aroma Кава в зернах", details:"1кг, 6 шт", price:907.80, brand:"Lavazza", available:true},
+  {cat:"Кава Lavazza", name:"Lavazza Rossa Кава в зернах ОРИГІНАЛ", details:"1кг, 6 шт", price:976.65, brand:"Lavazza", available:true},
+  {cat:"Кава Lavazza", name:"Lavazza Suerte Кава в зернах", details:"1кг, 6 шт", price:779.79, brand:"Lavazza", available:true},
+  {cat:"Кава Lavazza", name:"Lavazza ORO Кава мелена вакуум ОРИГІНАЛ", details:"250г, 20 шт", price:275.40, brand:"Lavazza", available:true},
+  {cat:"Кава Lavazza", name:"Lavazza Дольче Кава мелена вакуум", details:"250г", price:215.22, brand:"Lavazza", available:true},
+  {cat:"Кава Lavazza", name:"Lavazza Rossa Кава мелена вакуум", details:"250г, 20 шт", price:215.73, brand:"Lavazza", available:true},
+  {cat:"Кава Lavazza", name:"Lavazza Crema Forte Кава мелена вакуум", details:"250г, 18 шт", price:117.30, brand:"Lavazza", available:true},
+  {cat:"Кава Lavazza", name:"Lavazza Дек без кофеїну Кава мелена", details:"250г, 20 шт", price:221.85, brand:"Lavazza", available:true},
+  {cat:"Кава Lavazza", name:"Lavazza Espresso Italiana Кава мелена", details:"250г, 20 шт", price:315.18, brand:"Lavazza", available:true},
+  {cat:"Кава Lavazza", name:"Lavazza Crema Gusto Кава мелена вакуум", details:"250г, 20 шт", price:225.42, brand:"Lavazza", available:true},
+  {cat:"Кава Lavazza", name:"Lavazza Suerte Кава мелена вакуум", details:"250г, 20 шт", price:208.08, brand:"Lavazza", available:true},
+  {cat:"Кава Lavazza", name:"Prodomo Dallmayr мелений", details:"500г, 12 шт", price:429.42, brand:"Dallmayr", available:true},
+  {cat:"Кава Lavazza", name:"Dallmayr Classic мелений", details:"500г, 12 шт", price:341.70, brand:"Dallmayr", available:true},
+  {cat:"Кава Lavazza", name:"Lavazza Qualita Rossa мелена ж/б", details:"250г, 12 шт", price:214.71, brand:"Lavazza", available:true},
+  {cat:"Кава Lavazza", name:"Lavazza Crema e Gusto мелена ж/б", details:"250г, 12 шт", price:267.75, brand:"Lavazza", available:true},
+  {cat:"Кава Lavazza", name:"Lavazza Espresso мелена ж/б", details:"250г, 12 шт", price:329.46, brand:"Lavazza", available:true},
+  {cat:"Кава Lavazza", name:"Lavazza Qualita Oro Mountain Grown мелена ж/б", details:"250г, 12 шт", price:236.13, brand:"Lavazza", available:true},
+  {cat:"Кава Lavazza", name:"Kimbo Aroma Italiano кава мелена", details:"250г", price:191.25, brand:"Kimbo", available:true},
+  {cat:"Кава Lavazza", name:"Кава Колумбія мелена", details:"250г, 10 шт", price:130.00, brand:"Колумбія", available:true},
+  {cat:"Кава Lavazza", name:"Кава Колумбія мелена", details:"500г, 6 шт", price:220.00, brand:"Колумбія", available:true},
+  {cat:"Кава Lavazza", name:"Mövenpick Кава в зернах", details:"500г, 10 шт", price:426.87, brand:"Mövenpick", available:true},
+  {cat:"Кава Lavazza", name:"Mövenpick Кава мелена", details:"500г, 12 шт", price:410.55, brand:"Mövenpick", available:true},
+  {cat:"Кава Lavazza", name:"Mocca Кава мелена вакуум", details:"500г, 12 шт", price:265.20, brand:"Mocca", available:true},
+  {cat:"Кава Lavazza", name:"Mocca FIX Gold Кава мелена вакуум", details:"500г, 12 шт", price:265.20, brand:"Mocca", available:true},
+  {cat:"Кава Lavazza", name:"Mocca FIX Melang Кава мелена вакуум", details:"500г, 12 шт", price:265.20, brand:"Mocca", available:true},
+  {cat:"Кава Lavazza", name:"Monterico Colombia 100% Arabica в зернах", details:"1кг, 6 шт/ящ", price:877.20, brand:"Monterico", available:true},
+  {cat:"Кава Lavazza", name:"Monterico Ethiopia 100% Arabica в зернах", details:"1кг, 6 шт/ящ", price:877.20, brand:"Monterico", available:true},
+  {cat:"Кава Lavazza", name:"Monterico Brasil 100% Arabica в зернах", details:"1кг, 6 шт/ящ", price:851.70, brand:"Monterico", available:true},
+  {cat:"Кава Lavazza", name:"Monterico Costa Rica 100% Arabica в зернах", details:"1кг, 6 шт/ящ", price:877.20, brand:"Monterico", available:true},
+  {cat:"Кава Lavazza", name:"Monterico Tanzania 100% Arabica в зернах", details:"1кг, 6 шт/ящ", price:877.20, brand:"Monterico", available:true},
+  {cat:"Кава Lavazza", name:"Monterico Mexico 100% Arabica в зернах", details:"1кг, 6 шт/ящ", price:877.20, brand:"Monterico", available:true},
+  {cat:"Кава Lavazza", name:"Le Cafe Crema в зернах", details:"250г, 8 шт", price:168.30, brand:"Le Cafe", available:true},
+  {cat:"Кава Lavazza", name:"Le Cafe Espresso в зернах", details:"250г, 8 шт", price:168.30, brand:"Le Cafe", available:true},
+  {cat:"Кава розчинна", name:"Cafe d'Or Gold розчинна", details:"200г, скляна банка, 9 шт", price:249.39, brand:"Cafe d'Or", available:true},
+  {cat:"Кава розчинна", name:"Кавовий напій Cafe d'Or O Poranku", details:"300г, скло, 6 шт", price:208.00, brand:"Cafe d'Or", available:true},
+  {cat:"Кава розчинна", name:"DeMontre Gold розчинна", details:"200г, скляна банка, 6 шт", price:211.00, brand:"DeMontre", available:true},
+  {cat:"Кава розчинна", name:"DeMontre Premium розчинна", details:"200г, скляна банка, 6 шт", price:221.00, brand:"DeMontre", available:true},
+  {cat:"Кава розчинна", name:"DeMontre Intensive розчинна", details:"200г, скляна банка, 6 шт", price:211.00, brand:"DeMontre", available:true},
+  {cat:"Чай", name:"Westminster Чай чорний розсипний", details:"250г, 21 шт", price:137.19, brand:"Westminster", available:true},
+
+  // Какао та капучіно
+  {cat:"Какао та Капучіно", name:"Какао Ріоленд 100%", details:"80г, 20 шт", price:10.50, brand:"Ріоленд", available:true},
+  {cat:"Какао та Капучіно", name:"Какао Magnetic", details:"200г, 12 шт", price:64.50, brand:"Magnetic", available:true},
+  {cat:"Какао та Капучіно", name:"Какао Goody Cao", details:"500г, 10 шт", price:77.00, brand:"Goody Cao", available:true},
+  {cat:"Какао та Капучіно", name:"Капучіно La Movida Сметанкове", details:"130г, 30 шт, Польща", price:32.00, brand:"La Movida", available:true},
+  {cat:"Какао та Капучіно", name:"Капучіно La Movida Шоколадне", details:"130г, 30 шт, Польща", price:32.00, brand:"La Movida", available:true},
+  {cat:"Какао та Капучіно", name:"Капучіно La Movida Ванільне", details:"130г, 30 шт, Польща", price:32.00, brand:"La Movida", available:true},
+  {cat:"Какао та Капучіно", name:"Капучіно La Movida Горіхове", details:"130г, 30 шт, Польща", price:32.00, brand:"La Movida", available:true},
+  {cat:"Какао та Капучіно", name:"Замінник цукру Бест Тайм", details:"1200 таб, 24 шт", price:69.00, brand:"Бест Тайм", available:true},
+  {cat:"Какао та Капучіно", name:"Замінник цукру Хуксол", details:"1200 таб, 24 шт", price:71.00, brand:"Хуксол", available:true},
+  {cat:"Какао та Капучіно", name:"Замінник цукру Хуксол рідкий", details:"200мл, 15 шт", price:72.00, brand:"Хуксол", available:true},
+
+  // Приправи
+  {cat:"Приправи", name:"Приправа RMIX Універсальна", details:"850г, 12 шт, Польща", price:48.50, brand:"RMIX", available:true},
+  {cat:"Приправи", name:"Приправа RMIX Універсальна", details:"200г, 20 шт, Польща", price:15.60, brand:"RMIX", available:true},
+  {cat:"Приправи", name:"Приправа Кухарек Універсальна", details:"200г, 20 шт, Польща", price:27.00, brand:"Кухарек", available:true},
+  {cat:"Приправи", name:"Приправа RMIX Морська сіль з травами", details:"700г, 12 шт, Польща", price:59.00, brand:"RMIX", available:true},
+  {cat:"Приправи", name:"Приправа RMIX Гімалайська сіль", details:"350г, 12 шт, Польща", price:34.00, brand:"RMIX", available:true},
+  {cat:"Приправи", name:"Приправа RMIX Гімалайська сіль", details:"900г, Польща", price:58.00, brand:"RMIX", available:true},
+  {cat:"Приправи", name:"Перець мелений", details:"80г, дой-пак, 50 шт, Польща", price:19.00, brand:"Польща", available:true},
+  {cat:"Приправи", name:"Перець горошок", details:"80г, дой-пак, 50 шт, Польща", price:58.00, brand:"Польща", available:true},
+  {cat:"Приправи", name:"Приправа Primat часник гранульований", details:"15г, 25 шт", price:11.00, brand:"Primat", available:true},
+  {cat:"Приправи", name:"Приправа Primat Весняна", details:"15г, 25 шт", price:9.00, brand:"Primat", available:true},
+  {cat:"Приправи", name:"Приправа Primat Вірменська", details:"15г, 25 шт", price:9.00, brand:"Primat", available:true},
+  {cat:"Приправи", name:"Приправа Primat До картоплі фрі", details:"15г, 25 шт", price:9.00, brand:"Primat", available:true},
+  {cat:"Приправи", name:"Приправа Primat Для корейської моркви", details:"15г, 25 шт", price:9.00, brand:"Primat", available:true},
+  {cat:"Приправи", name:"Приправа Primat Для жарки м'яса", details:"15г, 25 шт", price:9.00, brand:"Primat", available:true},
+  {cat:"Приправи", name:"Приправа Primat До курки", details:"15г, 25 шт", price:9.00, brand:"Primat", available:true},
+  {cat:"Приправи", name:"Приправа Primat До курки по-східному", details:"15г, 25 шт", price:9.00, brand:"Primat", available:true},
+  {cat:"Приправи", name:"Приправа Primat До плову", details:"15г, 25 шт", price:9.00, brand:"Primat", available:true},
+  {cat:"Приправи", name:"Приправа Primat До риби", details:"15г, 25 шт", price:9.00, brand:"Primat", available:true},
+  {cat:"Приправи", name:"Приправа Primat До свинини і баранини", details:"15г, 25 шт", price:9.00, brand:"Primat", available:true},
+  {cat:"Приправи", name:"Приправа Primat До фаршу і котлет", details:"15г, 25 шт", price:9.00, brand:"Primat", available:true},
+  {cat:"Приправи", name:"Приправа Primat До шашлику", details:"15г, 25 шт", price:9.00, brand:"Primat", available:true},
+  {cat:"Приправи", name:"Приправа Primat Кавказька", details:"15г, 25 шт", price:9.00, brand:"Primat", available:true},
+  {cat:"Приправи", name:"Приправа Primat Солодка", details:"15г, 25 шт", price:9.00, brand:"Primat", available:true},
+  {cat:"Приправи", name:"Приправа Primat Чорний перець мелений", details:"20г, 25 шт", price:9.30, brand:"Primat", available:true},
+
+  // Риба та морепродукти — Тунець
+  {cat:"Риба та Тунець", name:"Тунець RIO філе в олії", details:"170г, 48 шт", price:64.50, brand:"RIO", available:true},
+  {cat:"Риба та Тунець", name:"Тунець RIO філе у власному соку", details:"170г, 48 шт", price:64.50, brand:"RIO", available:true},
+  {cat:"Риба та Тунець", name:"Тунець Best Time філе у власному соку Ісландія", details:"185г, з/б, 48 шт", price:82.00, brand:"Best Time", available:true},
+  {cat:"Риба та Тунець", name:"Тунець Best Time філе в олії Ісландія", details:"185г, з/б, 48 шт", price:83.00, brand:"Best Time", available:true},
+  {cat:"Риба та Тунець", name:"Тунець Best Time шматочками у власному соку", details:"185г, з/б, 48 шт", price:50.00, brand:"Best Time", available:true},
+  {cat:"Риба та Тунець", name:"Тунець Best Time шматочками в олії Ісландія", details:"185г, з/б, 48 шт", price:50.00, brand:"Best Time", available:true},
+  {cat:"Риба та Тунець", name:"Філе тунця VERSU в олії скло", details:"190г, 12 шт", price:144.84, brand:"VERSU", available:true},
+  {cat:"Риба та Тунець", name:"Філе тунця VERSU в оливковій олії скло", details:"190г, 12 шт", price:163.20, brand:"VERSU", available:true},
+  {cat:"Риба та Тунець", name:"Філе тунця Mare Aperto у власному соку", details:"180г, скло, 12 шт/ящ", price:178.50, brand:"Mare Aperto", available:true},
+  {cat:"Риба та Тунець", name:"Тунець RIO MARE філе в олії", details:"65г, 4 шт", price:61.20, brand:"RIO MARE", available:true},
+  {cat:"Риба та Тунець", name:"Тунець RIO MARE філе у власному соку", details:"80г, 4 шт", price:64.26, brand:"RIO MARE", available:true},
+  {cat:"Риба та Тунець", name:"Сардини Best Time в олії Ісландія", details:"125г, з/б, 24 шт", price:37.00, brand:"Best Time", available:true},
+  {cat:"Риба та Тунець", name:"Сардини Best Time в томаті Ісландія", details:"125г, з/б, 24 шт", price:37.00, brand:"Best Time", available:true},
+  {cat:"Риба та Тунець", name:"Філе ісландської сардини в томаті Best Time", details:"125г, 12 шт", price:35.00, brand:"Best Time", available:true},
+  {cat:"Риба та Тунець", name:"Філе ісландської сардини копчена в томаті Best Time", details:"125г, 12 шт", price:35.00, brand:"Best Time", available:true},
+  {cat:"Риба та Тунець", name:"Скумбрія подрібнена в т/с Best Time Ісландія", details:"125г, 12 шт", price:35.00, brand:"Best Time", available:true},
+  {cat:"Риба та Тунець", name:"Анчоус Мортемаре", details:"80г, 12 шт", price:88.23, brand:"Мортемаре", available:true},
+  {cat:"Риба та Тунець", name:"Анчоус Мортемаре", details:"720г, 24 шт", price:587.52, brand:"Мортемаре", available:true},
+
+  // Рижське золото та Брівайс
+  {cat:"Шпроти та Рижське золото", name:"Салака обсмажена в олії Брівайс Латвія", details:"240г, з/б, 24 шт", price:116.00, brand:"Брівайс", available:true},
+  {cat:"Шпроти та Рижське золото", name:"Шпроти Ризькі Брівайс Латвія в олії", details:"240г, з/б, 24 шт", price:116.00, brand:"Брівайс", available:true},
+  {cat:"Шпроти та Рижське золото", name:"Шпроти Великі Брівайс Латвія в олії", details:"240г, з/б, 36 шт", price:116.00, brand:"Брівайс", available:true},
+  {cat:"Шпроти та Рижське золото", name:"Шпроти Ризькі Брівайс Латвія в олії", details:"190г, з/б, 36 шт", price:115.00, brand:"Брівайс", available:true},
+  {cat:"Шпроти та Рижське золото", name:"Шпроти Великі Брівайс Латвія в олії", details:"190г, з/б, 36 шт", price:96.00, brand:"Брівайс", available:true},
+  {cat:"Шпроти та Рижське золото", name:"Скумбрія Брівайс Латвія у томаті", details:"240г, з/б, 24 шт", price:95.00, brand:"Брівайс", available:true},
+  {cat:"Шпроти та Рижське золото", name:"Скумбрія Брівайс Латвія в олії", details:"240г, з/б, 24 шт", price:96.00, brand:"Брівайс", available:true},
+  {cat:"Шпроти та Рижське золото", name:"Сардина Брівайс Латвія в олії", details:"240г, 24 шт", price:91.00, brand:"Брівайс", available:true},
+  {cat:"Шпроти та Рижське золото", name:"Сардина Брівайс Латвія в томаті", details:"240г, 24 шт", price:68.00, brand:"Брівайс", available:true},
+  {cat:"Шпроти та Рижське золото", name:"Килька Брівайс обсмажена з овочами", details:"240г, 24 шт", price:76.00, brand:"Брівайс", available:true},
+  {cat:"Шпроти та Рижське золото", name:"Паштет шпротний Брівайс Латвія", details:"160г, 24 шт", price:48.00, brand:"Брівайс", available:true},
+  {cat:"Шпроти та Рижське золото", name:"Печінка тріски Рижське золото", details:"230г, з прозорою кришкою, 24 шт", price:170.00, brand:"Рижське золото", available:true},
+  {cat:"Шпроти та Рижське золото", name:"Килька Рижське золото балтійська в т/с скло", details:"280г, 12 шт", price:48.00, brand:"Рижське золото", available:true},
+  {cat:"Шпроти та Рижське золото", name:"Шпроти Рижське золото в оливковій олії №2", details:"160г, ж/б, 36 шт", price:60.00, brand:"Рижське золото", available:true},
+  {cat:"Шпроти та Рижське золото", name:"Шпроти Рижське золото в оливковій олії №3", details:"240г, ж/б, 24 шт", price:69.00, brand:"Рижське золото", available:true},
+  {cat:"Шпроти та Рижське золото", name:"Шпроти Рижське золото в олії №2", details:"160г, ж/б, 36 шт", price:57.00, brand:"Рижське золото", available:true},
+  {cat:"Шпроти та Рижське золото", name:"Шпроти Рижське золото в олії №3", details:"240г, ж/б, 24 шт", price:71.50, brand:"Рижське золото", available:true},
+  {cat:"Шпроти та Рижське золото", name:"Шпроти Рижське золото в олії скло", details:"270г, 12 шт", price:90.00, brand:"Рижське золото", available:true},
+  {cat:"Шпроти та Рижське золото", name:"Шпроти в олії вікно МК", details:"112/160г, 12 шт/ящ", price:90.27, brand:"МК", available:true},
+  {cat:"Шпроти та Рижське золото", name:"Килька в томаті", details:"400г, 12 шт", price:38.50, brand:"", available:true},
+
+  // STORM
+  {cat:"STORM", name:"Скумбрія у маринаді STORM Ісландія", details:"225г, дойпак, 12 шт", price:50.00, brand:"STORM", available:true},
+  {cat:"STORM", name:"Скумбрія в олії STORM Ісландія", details:"225г, дойпак, 12 шт", price:50.00, brand:"STORM", available:true},
+  {cat:"STORM", name:"Скумбрія у томаті STORM Ісландія", details:"235г, дойпак, 12 шт", price:75.00, brand:"STORM", available:true},
+  {cat:"STORM", name:"Філе ісландської сардини в маринаді STORM", details:"185г, філпак, 14 шт", price:45.00, brand:"STORM", available:true},
+  {cat:"STORM", name:"Філе ісландської сардини в олії STORM", details:"185г, філпак, 14 шт", price:45.00, brand:"STORM", available:true},
+  {cat:"STORM", name:"Філе ісландської сардини в томаті STORM", details:"205г, філпак, 14 шт", price:45.00, brand:"STORM", available:true},
+  {cat:"STORM", name:"Філе ісландської сардини в маринаді STORM", details:"101г, філпак, 20 шт", price:27.50, brand:"STORM", available:true},
+  {cat:"STORM", name:"Філе ісландської сардини в олії STORM", details:"101г, філпак, 20 шт", price:27.50, brand:"STORM", available:true},
+  {cat:"STORM", name:"Філе ісландської сардини в томаті STORM", details:"111г, філпак, 20 шт", price:27.50, brand:"STORM", available:true},
+
+  // Печінка тріски
+  {cat:"Печінка тріски", name:"Печінка тріски Best Time натуральна", details:"182г, 10 шт", price:135.00, brand:"Best Time", available:true},
+  {cat:"Печінка тріски", name:"Печінка тріски Best Time натуральна Ісландія", details:"121г, з/б, 12 шт", price:91.00, brand:"Best Time", available:true},
+  {cat:"Печінка тріски", name:"Печінка тріски Best Time натуральна Ісландія", details:"202г, з/б, 12 шт", price:156.00, brand:"Best Time", available:true},
+  {cat:"Печінка тріски", name:"Печінка тріски Landice Гренландія", details:"121г, 12 шт", price:87.00, brand:"Landice", available:true},
+  {cat:"Печінка тріски", name:"Печінка тріски Landice Гренландія", details:"202г, 24 шт", price:151.00, brand:"Landice", available:true},
+
+  // Ікра
+  {cat:"Ікра червона", name:"Ікра червона ПАРАМУШ Горбуша", details:"120г, з/б, 24 шт", price:376.00, brand:"ПАРАМУШ", available:true},
+  {cat:"Ікра червона", name:"Ікра червона ПАРАМУШ РИБ 1 сорт Горбуша", details:"100г, з/б, 24 шт", price:315.00, brand:"ПАРАМУШ", available:true},
+  {cat:"Ікра червона", name:"Ікра червона ВИСОКИЙ ПОСОЛ 2 сорт Горбуша", details:"100г, з/б, 24 шт", price:260.00, brand:"Виcoкий Посол", available:true},
+  {cat:"Ікра червона", name:"Ікра червона Кета ОСТРІВ", details:"100г, з/б, 12 шт", price:378.00, brand:"ОСТРІВ", available:true},
+  {cat:"Ікра червона", name:"Ікра червона Кета ОСТРІВ скло", details:"100г, скло, 8 шт", price:376.00, brand:"ОСТРІВ", available:true},
+  {cat:"Ікра червона", name:"Ікра червона Кета ОСТРІВ скло", details:"190г, скло, 12 шт", price:710.00, brand:"ОСТРІВ", available:true},
+  {cat:"Ікра червона", name:"Ікра червона ЧЕРВОНЕ ЗОЛОТО Горбуша", details:"200г, скло, 12 шт", price:987.00, brand:"Червоне Золото", available:true},
+  {cat:"Ікра червона", name:"Ікра червона ЧЕРВОНЕ ЗОЛОТО Горбуша", details:"500г, скло, 12 шт", price:2475.00, brand:"Червоне Золото", available:true},
+  {cat:"Ікра червона", name:"Ікра червона ЧЕРВОНЕ ЗОЛОТО Форель", details:"100г, скло, 12 шт", price:371.00, brand:"Червоне Золото", available:true},
+  {cat:"Ікра червона", name:"Ікра червона ЧЕРВОНЕ ЗОЛОТО Форель", details:"200г, скло, 12 шт", price:726.00, brand:"Червоне Золото", available:true},
+  {cat:"Ікра червона", name:"Ікра червона ЧЕРВОНЕ ЗОЛОТО Форель", details:"500г, скло, 6 шт", price:1820.00, brand:"Червоне Золото", available:true},
+  {cat:"Ікра червона", name:"Ікра червона ЧЕРВОНЕ ЗОЛОТО Кета", details:"200г, скло, 12 шт", price:1092.00, brand:"Червоне Золото", available:true},
+  {cat:"Ікра червона", name:"Ікра червона ЧЕРВОНЕ ЗОЛОТО Кета", details:"500г, скло, 12 шт", price:2737.00, brand:"Червоне Золото", available:true},
+  {cat:"Ікра червона", name:"Ікра червона ЧЕРВОНЕ ЗОЛОТО Чавіча велика", details:"200г, скло, 12 шт", price:1131.00, brand:"Червоне Золото", available:true},
+  {cat:"Ікра червона", name:"Ікра червона ЧЕРВОНЕ ЗОЛОТО Чавіча велика", details:"500г, скло, 12 шт", price:2834.00, brand:"Червоне Золото", available:true},
+  {cat:"Ікра червона", name:"Ікра червона ЗОЛОТА УНЦІЯ Форель", details:"90г, скло, 8 шт", price:326.00, brand:"Золота Унція", available:true},
+  {cat:"Ікра червона", name:"Ікра червона ЗОЛОТА УНЦІЯ Форель", details:"190г, скло", price:679.00, brand:"Золота Унція", available:true},
+  {cat:"Ікра червона", name:"Ікра червона ЗОЛОТА УНЦІЯ Форель", details:"500г", price:1794.00, brand:"Золота Унція", available:true},
+  {cat:"Ікра червона", name:"Ікра червона LEMBERG Горбуша", details:"300г, з/б, 18 шт", price:1122.00, brand:"LEMBERG", available:true},
+  {cat:"Ікра червона", name:"Ікра червона LEMBERG Горбуша", details:"500г, 6 шт", price:1836.00, brand:"LEMBERG", available:true},
+  {cat:"Ікра імітація", name:"Ікра чорна Осетра імітована ІКОРНО", details:"100г, скло, 8 шт", price:38.00, brand:"ІКОРНО", available:true},
+  {cat:"Ікра імітація", name:"Ікра чорна Осетра імітована ІКОРНО", details:"200г, скло, 8 шт", price:70.60, brand:"ІКОРНО", available:true},
+  {cat:"Ікра імітація", name:"Ікра червона Горбуші імітована ІКОРНО", details:"100г, скло, 8 шт", price:38.00, brand:"ІКОРНО", available:true},
+  {cat:"Ікра імітація", name:"Ікра червона Горбуші імітована ІКОРНО", details:"200г, скло, 12 шт", price:70.60, brand:"ІКОРНО", available:true},
+  {cat:"Ікра імітація", name:"Ікра червона форелі імітована ІКОРНО", details:"100г, скло, 8 шт", price:35.00, brand:"ІКОРНО", available:true},
+  {cat:"Ікра імітація", name:"Ікра червона форелі імітована ІКОРНО", details:"200г, скло, 12 шт", price:66.00, brand:"ІКОРНО", available:true},
+  {cat:"Ікра імітація", name:"Ікра червона лососева імітована ІКОРНО", details:"200г, з/б, 12 шт", price:49.50, brand:"ІКОРНО", available:true},
+  {cat:"Ікра імітація", name:"Ікра БІЛИХ РИБ мінтая", details:"90г, з/б, 24 шт", price:63.00, brand:"Білих Риб", available:true},
+  {cat:"Ікра імітація", name:"Ікра БІЛИХ РИБ мінтая", details:"190г, з/б, 24 шт", price:120.00, brand:"Білих Риб", available:true},
+  {cat:"Ікра імітація", name:"Ікра БІЛИХ РИБ тріски", details:"90г, з/б, 24 шт", price:59.00, brand:"Білих Риб", available:true},
+  {cat:"Ікра імітація", name:"Ікра БІЛИХ РИБ тріски", details:"90г (190г), з/б, 24 шт", price:111.00, brand:"Білих Риб", available:true},
+
+  // Філе риби
+  {cat:"Філе риби", name:"Філе сьомги/лосося", details:"150г, вакуумна упаковка, 5 шт", price:115.00, brand:"", available:true},
+  {cat:"Філе риби", name:"Філе сьомги/лосося", details:"300г, вакуумна упаковка, 20 шт", price:220.00, brand:"", available:true},
+  {cat:"Філе риби", name:"Стружка лосося", details:"300г, судок, 18 шт", price:106.00, brand:"", available:true},
+
+  // Морепродукти
+  {cat:"Морепродукти", name:"Восьминіг в олії Didi Tacos тихоокеанський", details:"266г, Іспанія, 24 шт", price:196.35, brand:"Didi Tacos", available:true},
+  {cat:"Морепродукти", name:"Восьминіг з часником Didi Tacos тихоокеанський", details:"266г, Іспанія, 24 шт", price:196.35, brand:"Didi Tacos", available:true},
+  {cat:"Морепродукти", name:"Восьминіг в маринаді Didi Tacos тихоокеанський", details:"266г, Іспанія, 24 шт", price:196.35, brand:"Didi Tacos", available:true},
+  {cat:"Морепродукти", name:"Кальмар у чорнильному супі Calamares Didi", details:"266г, Іспанія, 24 шт", price:133.11, brand:"Didi Tacos", available:true},
+
+  // Оливки та каперси
+  {cat:"Оливки та Каперси", name:"Оливки Хутесса м'яка пачка", details:"180г", price:29.30, brand:"Хутесса", available:true},
+  {cat:"Оливки та Каперси", name:"Оливки Хутесса Іспанія", details:"900г, скло, 6 шт", price:138.00, brand:"Хутесса", available:true},
+  {cat:"Оливки та Каперси", name:"Маслини Хутесса Іспанія", details:"900г, скло, 6 шт", price:138.00, brand:"Хутесса", available:true},
+  {cat:"Оливки та Каперси", name:"Оливки Хутесса Іспанія", details:"350г, скло, 12 шт", price:68.00, brand:"Хутесса", available:true},
+  {cat:"Оливки та Каперси", name:"Маслини Хутесса Іспанія", details:"350г, скло, 12 шт", price:68.00, brand:"Хутесса", available:true},
+  {cat:"Оливки та Каперси", name:"Оливки Хелком чорні Іспанія", details:"330г, скло, 12 шт", price:65.00, brand:"Хелком", available:true},
+  {cat:"Оливки та Каперси", name:"Маслини Хелком зелені Іспанія", details:"330г, скло, 12 шт", price:65.00, brand:"Хелком", available:true},
+  {cat:"Оливки та Каперси", name:"Оливки БРАВО КУВШИН", details:"2,5л, 3 шт", price:637.50, brand:"БРАВО", available:true},
+  {cat:"Оливки та Каперси", name:"Оливки Bernal Гіганти б/к б/оцту", details:"436г (суха вага 220г), 12 шт/ящ", price:147.90, brand:"Bernal", available:true},
+  {cat:"Оливки та Каперси", name:"Оливки Bernal Gourmet фаршировані апельсином", details:"436г (суха вага 250г), 12 шт/ящ", price:124.95, brand:"Bernal", available:true},
+  {cat:"Оливки та Каперси", name:"Оливки Bernal Gourmet фаршировані блакитний сир", details:"436г (суха вага 250г), 12 шт/ящ", price:124.95, brand:"Bernal", available:true},
+  {cat:"Оливки та Каперси", name:"Оливки Bernal Gourmet фаршировані лімон", details:"436г (суха вага 250г), 12 шт/ящ", price:124.95, brand:"Bernal", available:true},
+  {cat:"Оливки та Каперси", name:"Оливки Bernal Gourmet фаршировані перець", details:"436г (суха вага 250г), 12 шт/ящ", price:124.95, brand:"Bernal", available:true},
+  {cat:"Оливки та Каперси", name:"Оливки Bravo Гіганти без кісточки", details:"1000г (суха вага 500г), 6 шт/ящ", price:242.25, brand:"Bravo", available:true},
+  {cat:"Оливки та Каперси", name:"Оливки Bravo Гіганти з кісточкою", details:"1000г (суха вага 500г), 6 шт/ящ", price:242.25, brand:"Bravo", available:true},
+  {cat:"Оливки та Каперси", name:"Оливки Bravo Gazpacha коктель 7 овочів", details:"1000г (суха вага 550г), 6 шт/ящ", price:154.53, brand:"Bravo", available:true},
+  {cat:"Оливки та Каперси", name:"Оливки каламата", details:"436г (суха вага 250г), 12 шт/ящ", price:131.07, brand:"", available:true},
+  {cat:"Оливки та Каперси", name:"Оливки в'ялені Bernal", details:"436г (суха вага 250г), 12 шт", price:83.13, brand:"Bernal", available:true},
+  {cat:"Оливки та Каперси", name:"Оливки Bernal Чупадедас", details:"436г", price:95.37, brand:"Bernal", available:true},
+  {cat:"Оливки та Каперси", name:"Оливки Bernal фаршировані трюфелем", details:"300г", price:169.83, brand:"Bernal", available:true},
+  {cat:"Оливки та Каперси", name:"Оливки Bernal фаршировані мигдалем", details:"300г", price:147.90, brand:"Bernal", available:true},
+  {cat:"Оливки та Каперси", name:"Оливки Corbi Іспанія б/к", details:"700г, 8 шт", price:182.07, brand:"Corbi", available:true},
+  {cat:"Оливки та Каперси", name:"Оливки Corbi Іспанія з кісточкою", details:"700г, 8 шт", price:195.84, brand:"Corbi", available:true},
+  {cat:"Оливки та Каперси", name:"Corbi коктель різні види оливок", details:"835г", price:155.04, brand:"Corbi", available:true},
+  {cat:"Оливки та Каперси", name:"Каперси мариновані Bernal", details:"210г, 12 шт/ящ", price:78.03, brand:"Bernal", available:true},
+  {cat:"Оливки та Каперси", name:"Каперси мариновані Luxeapers", details:"100г, 12 шт/ящ", price:46.00, brand:"Luxeapers", available:true},
+
+  // Снеки та Pan Grin
+  {cat:"Снеки та Грінки", name:"Фісташки Alesto", details:"250г (оригінал), сіль, 30 шт", price:158.00, brand:"Alesto", available:true},
+  {cat:"Снеки та Грінки", name:"Фісташки Alesto", details:"500г (оригінал), сіль, 30 шт", price:294.00, brand:"Alesto", available:true},
+  {cat:"Снеки та Грінки", name:"Арахіс солоний Солтіно", details:"100г, 50 шт", price:23.00, brand:"Солтіно", available:true},
+  {cat:"Снеки та Грінки", name:"Арахіс солоний Солтіно", details:"500г, 12 шт", price:98.00, brand:"Солтіно", available:true},
+  {cat:"Снеки та Грінки", name:"Ікра судака в'ялена Батарга", details:"500г", price:440.00, brand:"Батарга", available:true},
+  {cat:"Снеки та Грінки", name:"Палички м'ясні сировʼялені Пекельня Вишня", details:"50г", price:44.00, brand:"Пекельня", available:true},
+  {cat:"Снеки та Грінки", name:"Палички м'ясні сировʼялені По-іспанськи", details:"50г", price:44.00, brand:"Пекельня", available:true},
+  {cat:"Снеки та Грінки", name:"Палички м'ясні сировʼялені Пармезан", details:"50г", price:44.00, brand:"Пекельня", available:true},
+  {cat:"Снеки та Грінки", name:"Мюслі банан у шоколаді RMIX Польща", details:"350г, пакет, 24 шт", price:46.00, brand:"RMIX", available:true},
+  {cat:"Снеки та Грінки", name:"Мюслі ананас-ізюм RMIX Польща", details:"350г, пакет, 24 шт", price:46.00, brand:"RMIX", available:true},
+  {cat:"Снеки та Грінки", name:"Мюслі чорниця і журавлина RMIX Польща", details:"350г, пакет, 24 шт", price:46.00, brand:"RMIX", available:true},
+  {cat:"Снеки та Грінки", name:"Мюслі медові RMIX Польща", details:"350г, пакет, 24 шт", price:46.00, brand:"RMIX", available:true},
+  {cat:"Снеки та Грінки", name:"Мюслі яблуко-вишня RMIX Польща", details:"350г, пакет, 24 шт", price:46.00, brand:"RMIX", available:true},
+  {cat:"Снеки та Грінки", name:"Грінки Pan Grin житні", details:"80г, 20 шт", price:16.60, brand:"Pan Grin", available:true},
+  {cat:"Снеки та Грінки", name:"Грінки Pan Grin класичні", details:"80г, 20 шт", price:16.60, brand:"Pan Grin", available:true},
+  {cat:"Снеки та Грінки", name:"Грінки Pan Grin з часником та кропом", details:"80г, 20 шт", price:17.20, brand:"Pan Grin", available:true},
+  {cat:"Снеки та Грінки", name:"Грінки Pan Grin", details:"130г, 20 шт", price:25.00, brand:"Pan Grin", available:true},
+  {cat:"Снеки та Грінки", name:"Грінки Pan Grin часник", details:"130г, 16 шт", price:26.00, brand:"Pan Grin", available:true},
+  {cat:"Снеки та Грінки", name:"Грінки Pan Grin Туба", details:"100г, 20 шт", price:22.70, brand:"Pan Grin", available:true},
+  {cat:"Снеки та Грінки", name:"Грінки Pan Grin міні", details:"120г, 24 шт", price:27.00, brand:"Pan Grin", available:true},
+  {cat:"Снеки та Грінки", name:"Грінки Pan Grin кукурудзяні", details:"100г", price:23.00, brand:"Pan Grin", available:true},
+  {cat:"Снеки та Грінки", name:"Грінки Pan Grin гречані", details:"100г", price:27.00, brand:"Pan Grin", available:true},
+  {cat:"Снеки та Грінки", name:"Гріссіні Pan Grin з кунжутом", details:"200г", price:51.00, brand:"Pan Grin", available:true},
+  {cat:"Снеки та Грінки", name:"Гріссіні Pan Grin з часником та кропом", details:"150г", price:29.40, brand:"Pan Grin", available:true},
+  {cat:"Снеки та Грінки", name:"Гріссіні Pan Grin з розмарином", details:"150г", price:29.40, brand:"Pan Grin", available:true},
+  {cat:"Снеки та Грінки", name:"Гріссіні Pan Grin з насінням чіа, соняшника та льону", details:"150г", price:29.40, brand:"Pan Grin", available:true},
+  {cat:"Снеки та Грінки", name:"Крутони класичні Pan Grin", details:"100г", price:20.60, brand:"Pan Grin", available:true},
+  {cat:"Снеки та Грінки", name:"Крутони Італійські трави Pan Grin", details:"100г", price:20.60, brand:"Pan Grin", available:true},
+  {cat:"Снеки та Грінки", name:"Хлібці гречано-рисові з цибулею", details:"80г, 16 шт", price:17.50, brand:"Pan Grin", available:true},
+  {cat:"Снеки та Грінки", name:"Хлібці гречано-рисові з базиліком", details:"80г, 16 шт", price:17.50, brand:"Pan Grin", available:true},
+  {cat:"Снеки та Грінки", name:"Хлібці гречано-рисові з морською сіллю", details:"80г, 16 шт", price:17.50, brand:"Pan Grin", available:true},
+  {cat:"Снеки та Грінки", name:"Тарталетка пісочна", details:"130г, 26 шт", price:28.40, brand:"Pan Grin", available:true},
+  {cat:"Снеки та Грінки", name:"Тарталетка пісочна МІНІ", details:"130г, 26 шт", price:28.40, brand:"Pan Grin", available:true},
+  {cat:"Снеки та Грінки", name:"Заготовка для піци пшенична Minigrill Португалія", details:"250г, 30 шт", price:47.00, brand:"Minigrill", available:true},
+  {cat:"Снеки та Грінки", name:"Тости пшеничні Minigrill Португалія", details:"150г, 18 шт", price:38.50, brand:"Minigrill", available:true},
+  {cat:"Снеки та Грінки", name:"Тости пшеничні Minigrill Португалія", details:"120г, 18 шт", price:38.50, brand:"Minigrill", available:true},
+  {cat:"Снеки та Грінки", name:"Тости пшеничні цільнозернові Minigrill Португалія", details:"120г, 18 шт", price:38.50, brand:"Minigrill", available:true},
+  {cat:"Снеки та Грінки", name:"Тости пшеничні Minigrill Португалія", details:"90г, 20 шт", price:28.30, brand:"Minigrill", available:true},
+  {cat:"Снеки та Грінки", name:"Тости пшеничні цільнозернові Португалія", details:"90г, 20 шт", price:28.30, brand:"Minigrill", available:true},
+  {cat:"Снеки та Грінки", name:"Брускета з томатами та орегано", details:"150г, 12 шт", price:73.00, brand:"", available:true},
+  {cat:"Снеки та Грінки", name:"Брускета з часником та петрушкою", details:"150г, 12 шт", price:73.00, brand:"", available:true},
+  {cat:"Снеки та Грінки", name:"Міні гріссіні класичні Rialto", details:"300г, 10 шт", price:94.00, brand:"Rialto", available:true},
+  {cat:"Снеки та Грінки", name:"Тостадос класичний", details:"250г, 16 шт", price:85.00, brand:"", available:true},
+  {cat:"Снеки та Грінки", name:"Тостадос мультизерновий", details:"250г", price:92.00, brand:"", available:true},
+  {cat:"Снеки та Грінки", name:"Сухий сніданок MIAMI Hopki Польща", details:"500г, 8 шт", price:57.00, brand:"MIAMI", available:true},
+
+  // М'ясні вироби
+  {cat:"М'ясні вироби", name:"Прошутто кускове вагове", details:"", price:434.01, brand:"", available:true},
+  {cat:"М'ясні вироби", name:"Хамон Arroyo Jamon Serrano нарізка", details:"50г, 25 шт/ящ", price:57.12, brand:"Arroyo", available:true},
+  {cat:"М'ясні вироби", name:"Хамон Arroyo Jamon Serrano нарізка", details:"150г, 16 шт/ящ", price:144.84, brand:"Arroyo", available:true},
+
+  // Кондитерка
+  {cat:"Кондитерка", name:"Льодяники Woogie Fine Drops МІКС ФРУКТОВИЙ Австрія", details:"200г, 10 шт", price:73.95, brand:"Woogie", available:true},
+  {cat:"Кондитерка", name:"Льодяники Woogie Fine Drops ЛІСОВА ЯГОДА Австрія", details:"200г, 10 шт", price:73.95, brand:"Woogie", available:true},
+  {cat:"Кондитерка", name:"Льодяники Woogie Fine Drops ЛИМОН-АПЕЛЬСИН Австрія", details:"200г, 10 шт", price:73.95, brand:"Woogie", available:true},
+  {cat:"Кондитерка", name:"Льодяники Woogie Fine Drops ЛИМОН Австрія", details:"200г, 10 шт", price:73.95, brand:"Woogie", available:true},
+  {cat:"Кондитерка", name:"Льодяники Woogie Fine Drops МАЛИНА Австрія", details:"200г, 10 шт", price:73.95, brand:"Woogie", available:true},
+  {cat:"Кондитерка", name:"Льодяники Woogie Fine Drops ЯБЛУКО Австрія", details:"200г, 10 шт", price:73.95, brand:"Woogie", available:true},
+  {cat:"Кондитерка", name:"Льодяники Woogie Fine Drops ВИШНЯ Австрія", details:"200г, 10 шт", price:73.95, brand:"Woogie", available:true},
+  {cat:"Кондитерка", name:"Льодяники Woogie Fine Drops М'ЯТА Австрія", details:"200г, 10 шт", price:73.95, brand:"Woogie", available:true},
+  {cat:"Кондитерка", name:"Льодяники Woogie Fine Drops КАВОВИЙ СМАК Австрія", details:"200г, 10 шт", price:73.95, brand:"Woogie", available:true},
+  {cat:"Кондитерка", name:"Чорний шоколад Torras Postres з цукром 70% какао", details:"250г, 15 шт/ящ", price:245.82, brand:"Torras", available:true},
+  {cat:"Кондитерка", name:"Чорний шоколад Torras Zero 72% какао без цукру", details:"100г, 12 шт/ящ", price:124.95, brand:"Torras", available:true},
+  {cat:"Кондитерка", name:"Гарячий шоколад з цукром Torras", details:"180г, дойпак, 16 шт", price:80.07, brand:"Torras", available:true},
+  {cat:"Кондитерка", name:"Гарячий шоколад без цукру Torras", details:"180г, дойпак, 12 шт", price:106.59, brand:"Torras", available:true},
+  {cat:"Кондитерка", name:"Батончик марципан у шоколаді Zentis Marzipan", details:"100г, 40 шт/ящ", price:63.75, brand:"Zentis", available:true},
+];
+
+// Category icons
+const catIcons = {
+  "Всі": "🛒",
+  "ТМ RIO": "🥫",
+  "Соуси та оцти": "🫙",
+  "TERRA RICCA": "🫒",
+  "Олії": "🫗",
+  "Галицькі Традиції": "🌾",
+  "Бакалія": "🏪",
+  "Кава Swisso": "☕",
+  "Кава Himmel": "☕",
+  "Кава Lavazza": "☕",
+  "Кава розчинна": "☕",
+  "Чай": "🍵",
+  "Какао та Капучіно": "🍫",
+  "Приправи": "🌶️",
+  "Риба та Тунець": "🐟",
+  "Шпроти та Рижське золото": "🐠",
+  "STORM": "🌊",
+  "Печінка тріски": "🫙",
+  "Ікра червона": "🔴",
+  "Ікра імітація": "🟠",
+  "Філе риби": "🐡",
+  "Морепродукти": "🦑",
+  "Оливки та Каперси": "🫒",
+  "Снеки та Грінки": "🥨",
+  "М'ясні вироби": "🥩",
+  "Кондитерка": "🍬",
+};
+
+const categories = ["Всі", ...new Set(ALL_PRODUCTS.map(p => p.cat))];
+let activeCategory = "Всі";
+let showOnlyAvailable = true;
+let searchQuery = "";
+
+function getCatCount(cat) {
+  let list = ALL_PRODUCTS;
+  if (showOnlyAvailable) list = list.filter(p => p.available);
+  if (cat === "Всі") return list.length;
+  return list.filter(p => p.cat === cat).length;
+}
+
+function renderCategories() {
+  const container = document.getElementById("catsContainer");
+  container.innerHTML = categories.map(cat => {
+    const count = getCatCount(cat);
+    return `<button class="cat-btn ${cat === activeCategory ? 'active' : ''}" data-cat="${cat}">
+      <span>${catIcons[cat] || '📦'} ${cat}</span>
+      <span class="count">${count}</span>
+    </button>`;
+  }).join('');
+  container.querySelectorAll('.cat-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeCategory = btn.dataset.cat;
+      renderAll();
+    });
+  });
+}
+
+function formatPrice(price) {
+  if (!price || price === 0) return null;
+  return price % 1 === 0 ? price.toFixed(0) : price.toFixed(2);
+}
+
+function renderCard(p, delay) {
+  const priceStr = formatPrice(p.price);
+  return `<div class="card ${p.available ? '' : 'unavailable'}" style="animation-delay:${delay}ms">
+    ${p.brand ? `<div class="card-brand">${p.brand}</div>` : ''}
+    <div class="card-name">${p.name}</div>
+    ${p.details ? `<div class="card-details">${p.details}</div>` : ''}
+    <div class="card-footer">
+      <div>
+        ${p.available && priceStr ? `<span class="price-tag">${priceStr}<span class="currency">грн</span></span>` : ''}
+        ${!p.available ? `<span class="price-unavail">Немає в наявності</span>` : ''}
+        ${p.available && !priceStr ? `<span style="font-size:13px;color:var(--text-secondary);font-weight:600">Уточнити</span>` : ''}
+      </div>
+      ${p.details.includes('шт') ? `<span class="units-badge">${(p.details.match(/(\d+)\s*шт/) || ['',''])[1] || ''} шт</span>` : ''}
+    </div>
+  </div>`;
+}
+
+function renderMain() {
+  const main = document.getElementById("main");
+  let filtered = [...ALL_PRODUCTS];
+  if (showOnlyAvailable) filtered = filtered.filter(p => p.available);
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    filtered = filtered.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      p.brand.toLowerCase().includes(q) ||
+      p.details.toLowerCase().includes(q) ||
+      p.cat.toLowerCase().includes(q)
+    );
+  }
+  if (activeCategory !== "Всі") filtered = filtered.filter(p => p.cat === activeCategory);
+
+  if (filtered.length === 0) {
+    main.innerHTML = `<div class="no-results">
+      <div style="font-size:48px;margin-bottom:16px">🔍</div>
+      <div style="font-size:20px;font-weight:700;margin-bottom:8px">Нічого не знайдено</div>
+      <div style="font-size:15px;color:var(--text-secondary)">Спробуйте змінити фільтри або пошуковий запит</div>
+    </div>`;
+    return;
+  }
+
+  if (activeCategory !== "Всі" || searchQuery) {
+    // Single section
+    main.innerHTML = `<div class="section-header">
+      <span class="section-title">${activeCategory === "Всі" ? 'Результати пошуку' : activeCategory}</span>
+      <span class="section-count">${filtered.length} товарів</span>
+    </div>
+    <div class="products-grid">${filtered.map((p,i) => renderCard(p, i*30)).join('')}</div>`;
+  } else {
+    // Group by category
+    const grouped = {};
+    filtered.forEach(p => {
+      if (!grouped[p.cat]) grouped[p.cat] = [];
+      grouped[p.cat].push(p);
+    });
+    let html = '';
+    let globalIdx = 0;
+    for (const [cat, items] of Object.entries(grouped)) {
+      html += `<div class="section-header">
+        <span class="section-title">${catIcons[cat] || '📦'} ${cat}</span>
+        <span class="section-count">${items.length} товарів</span>
+      </div>
+      <div class="products-grid">${items.map((p,i) => renderCard(p, Math.min(i,8)*40)).join('')}</div>`;
+      globalIdx += items.length;
+    }
+    main.innerHTML = html;
+  }
+
+  // Update stats
+  document.getElementById("statsEl").textContent = `${filtered.length} товарів`;
+}
+
+function renderAll() {
+  renderCategories();
+  renderMain();
+}
+
+// Init
+renderAll();
+
+// Search
+document.getElementById("search").addEventListener("input", e => {
+  searchQuery = e.target.value.trim();
+  if (searchQuery && activeCategory !== "Всі") activeCategory = "Всі";
+  renderAll();
+});
+
+// Availability toggle
+const toggleEl = document.getElementById("availToggle");
+const switchEl = document.getElementById("toggleSwitch");
+toggleEl.addEventListener("click", () => {
+  showOnlyAvailable = !showOnlyAvailable;
+  switchEl.classList.toggle("active", showOnlyAvailable);
+  renderAll();
+});
+</script>
+</body>
+</html>
